@@ -1,0 +1,15 @@
+# Node modules
+node_modules/
+
+
+# Environment variables
+.env
+
+# Local configuration
+config.json
+
+# Logs
+*.log
+
+# OS files
+.DS_Store

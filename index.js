@@ -14,7 +14,8 @@ console.log(chalk.cyanBright('██   ██ ██      ██   ██    █
 console.log(chalk.cyanBright('██████  ███████ ██   ██    ██     ██████  ██████  ██   ██    ██    ███████ ██   ██ ██   ██ '));
 console.log(chalk.cyanBright('                                                                                           '));
 console.log(chalk.cyanBright('                                                                                           '));
-console.log(chalk.yellowBright('IPPANG ZEUS BOT - Coinflip Selfbot'));
+console.log(chalk.yellowBright('Coinflip Selfbot - Automated betting strategies for OwO bot'));
+console.log(chalk.redBright("If this bot wins, thank Ippang. If it loses, blame Copilot."));
 console.log('');
 
 // Config

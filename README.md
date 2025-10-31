@@ -1,4 +1,12 @@
-#
+# OwO Coinflip Selfbot
+
+## Disclaimer
+
+This bot does **not** guarantee you will win. The OwO coinflip uses cryptographically secure random numbers, so there is no way to predict or influence the outcome. The bot simply automates your betting strategy and helps you manage bets, but all results are ultimately random.
+
+Use this tool responsibly and understand the risks of gambling. Never bet more than you can afford to lose.
+
+---
 
 Automated coinflip betting for the OwO Discord bot using a martingale strategy.
 
@@ -12,7 +20,7 @@ Automated coinflip betting for the OwO Discord bot using a martingale strategy.
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/yourusername/owo-coinflip-selfbot.git
+   git clone https://github.com/irfanripat/owo-coinflip-selfbot.git
    cd owo-coinflip-selfbot
    ```
 
@@ -121,9 +129,3 @@ console.log(`%cYou now have your token in the clipboard!`, 'font-size: 16px');
 
 - [Martingale Strategy (Wikipedia)](https://en.wikipedia.org/wiki/Martingale_(betting_system))
 - [Reverse Martingale / Paroli System (Wikipedia)](https://en.wikipedia.org/wiki/Paroli_system)
-
----
-
-## Disclaimer
-
-This project is for educational purposes only. Use at your own risk. Automated selfbots may violate Discord's Terms of Service.

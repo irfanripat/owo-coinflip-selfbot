@@ -117,6 +117,13 @@ console.log(`%cYou now have your token in the clipboard!`, 'font-size: 16px');
 
 ---
 
+## References
+
+- [Martingale Strategy (Wikipedia)](https://en.wikipedia.org/wiki/Martingale_(betting_system))
+- [Reverse Martingale / Paroli System (Wikipedia)](https://en.wikipedia.org/wiki/Paroli_system)
+
+---
+
 ## Disclaimer
 
 This project is for educational purposes only. Use at your own risk. Automated selfbots may violate Discord's Terms of Service.

@@ -158,8 +158,43 @@ async function hybrid(client, channelId, baseBet = 1, maxBet = 1000, profitGoal 
   }
 }
 
+
+/**
+ * Flat Bet strategy: always bet the same amount, regardless of win/loss
+ */
+async function flatBet(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, chosenSide = 'random') {
+  let totalIncome = 0, totalFlips = 0;
+  const startTime = Date.now();
+  console.log(`🎮 Starting Flat Bet strategy with fixed bet ${baseBet}`);
+  while (true) {
+    if (totalIncome >= profitGoal) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🎉 Target profit reached: ${totalIncome}. Stopping bot.`);
+      console.log(`⏱️ Duration to reach profit: ${duration} seconds.`);
+      process.exit(0);
+    }
+    const currentSide = (chosenSide === 'random') ? randomSide() : chosenSide;
+    console.log(`🪙 Flip #${totalFlips + 1} | Bet: ${baseBet} | Side: ${currentSide}`);
+    const resultMsg = await getCoinflipResult(client, channelId, baseBet, currentSide);
+    totalFlips++;
+    if (!resultMsg) { console.log('⚠️ No result, retrying...'); continue; }
+    if (/you won/i.test(resultMsg.content)) {
+      totalIncome += baseBet;
+      console.log(`✅ WIN | +${baseBet} | Total: ${totalIncome}`);
+    } else if (/you lost/i.test(resultMsg.content)) {
+      totalIncome -= baseBet;
+      console.log(`❌ LOSS | -${baseBet} | Total: ${totalIncome}`);
+    }
+    if (totalFlips % 20 === 0) {
+      console.log(`📊 Stats → Total flips: ${totalFlips} | Total income: ${totalIncome}`);
+    }
+    await sleep(randomInt(15000, 20001));
+  }
+}
+
 module.exports = {
   martingale,
   reverseMartingale,
   hybrid,
+  flatBet,
 };

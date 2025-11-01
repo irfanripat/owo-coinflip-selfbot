@@ -40,7 +40,8 @@ const rl = readline.createInterface({
 const strategyMap = [
   { key: 'martingale', label: 'Martingale (double after loss, reset after win)' },
   { key: 'reverseMartingale', label: 'Reverse Martingale (double after win, reset after loss)' },
-  { key: 'hybrid', label: 'Hybrid (adaptive, streak-based, side switching)' }
+  { key: 'hybrid', label: 'Hybrid (adaptive, streak-based, side switching)' },
+  { key: 'flatBet', label: 'Flat Bet (fixed bet every round)' }
 ];
 console.log('Available coinflip strategies:');
 strategyMap.forEach((s, idx) => {
@@ -89,6 +90,7 @@ function askStrategy(initialBet, targetProfit) {
       console.log(`Martingale max attempts before reset: ${maxAttempts}`);
     }
 
+
     function runStrategy(reverseWinStreak = 2, chosenSide = 'random') {
       rl.close();
       for (const token of TOKEN) {
@@ -105,6 +107,8 @@ function askStrategy(initialBet, targetProfit) {
             strategy(client, channelId, initialBet, maxBet, targetProfit, maxAttempts, chosenSide);
           } else if (strategyObj.key === 'reverseMartingale') {
             strategy(client, channelId, initialBet, maxBet, targetProfit, reverseWinStreak, chosenSide);
+          } else if (strategyObj.key === 'flatBet') {
+            strategy(client, channelId, initialBet, maxBet, targetProfit, chosenSide);
           } else {
             strategy(client, channelId, initialBet, maxBet, targetProfit);
           }
@@ -134,7 +138,7 @@ function askStrategy(initialBet, targetProfit) {
         if (isNaN(reverseWinStreak) || reverseWinStreak < 1) reverseWinStreak = 2;
         askSideAndRun(reverseWinStreak);
       });
-    } else if (strategyObj.key === 'martingale') {
+    } else if (strategyObj.key === 'martingale' || strategyObj.key === 'flatBet') {
       askSideAndRun();
     } else {
       runStrategy();

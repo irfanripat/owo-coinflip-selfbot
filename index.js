@@ -69,6 +69,7 @@ function askTargetProfit(initialBet) {
   });
 }
 
+
 function askStrategy(initialBet, targetProfit) {
   rl.question('Select strategy number to run: ', (answer) => {
     const idx = parseInt(answer) - 1;
@@ -79,7 +80,6 @@ function askStrategy(initialBet, targetProfit) {
       process.exit(1);
     }
     const strategy = strategies[strategyObj.key];
-    rl.close();
 
     // Calculate max bet and max attempts for martingale
     const maxBet = 250000;
@@ -89,28 +89,55 @@ function askStrategy(initialBet, targetProfit) {
       console.log(`Martingale max attempts before reset: ${maxAttempts}`);
     }
 
-    for (const token of TOKEN) {
-      let statusBot = true;
-      let statusAfk = false;
-      let channelId = token.split('xxxxx')[1] || config.channelId;
+    function runStrategy(reverseWinStreak = 2, chosenSide = 'random') {
+      rl.close();
+      for (const token of TOKEN) {
+        let statusBot = true;
+        let statusAfk = false;
+        let channelId = token.split('xxxxx')[1] || config.channelId;
 
-      const client = new Client({ checkUpdate: false });
-      client.login(token.split('xxxxx')[0]);
+        const client = new Client({ checkUpdate: false });
+        client.login(token.split('xxxxx')[0]);
 
-      client.on('ready', async () => {
-        console.log(`(${client.user.tag}) ready for coinflip strategy: ${strategyObj.label}`);
-        if (strategyObj.key === 'martingale') {
-          strategy(client, channelId, initialBet, maxBet, targetProfit, maxAttempts);
-        } else {
-          strategy(client, channelId, initialBet, maxBet, targetProfit);
+        client.on('ready', async () => {
+          console.log(`(${client.user.tag}) ready for coinflip strategy: ${strategyObj.label}`);
+          if (strategyObj.key === 'martingale') {
+            strategy(client, channelId, initialBet, maxBet, targetProfit, maxAttempts, chosenSide);
+          } else if (strategyObj.key === 'reverseMartingale') {
+            strategy(client, channelId, initialBet, maxBet, targetProfit, reverseWinStreak, chosenSide);
+          } else {
+            strategy(client, channelId, initialBet, maxBet, targetProfit);
+          }
+        });
+
+        // ...existing messageCreate handler...
+        client.on('messageCreate', async (msg) => {
+          // ...existing code...
+          // ...existing code...
+        });
+      }
+    }
+
+    function askSideAndRun(reverseWinStreak = 2) {
+      rl.question('Choose side: [h/t/random] ', (sideInput) => {
+        let chosenSide = sideInput.trim().toLowerCase();
+        if (chosenSide !== 'h' && chosenSide !== 't' && chosenSide !== 'random') {
+          chosenSide = 'random';
         }
+        runStrategy(reverseWinStreak, chosenSide);
       });
+    }
 
-      // ...existing messageCreate handler...
-      client.on('messageCreate', async (msg) => {
-        // ...existing code...
-        // ...existing code...
+    if (strategyObj.key === 'reverseMartingale') {
+      rl.question('Enter consecutive wins before reset (default 2): ', (winInput) => {
+        let reverseWinStreak = parseInt(winInput);
+        if (isNaN(reverseWinStreak) || reverseWinStreak < 1) reverseWinStreak = 2;
+        askSideAndRun(reverseWinStreak);
       });
+    } else if (strategyObj.key === 'martingale') {
+      askSideAndRun();
+    } else {
+      runStrategy();
     }
   });
 }

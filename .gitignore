@@ -8,8 +8,10 @@ node_modules/
 # Local configuration
 config.json
 
+
 # Logs
 *.log
+coinflip_log.csv
 
 # OS files
 .DS_Store

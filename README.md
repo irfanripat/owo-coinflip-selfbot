@@ -57,7 +57,35 @@ Automated coinflip betting for the OwO Discord bot using a martingale strategy.
 
 ## Coinflip Strategies
 
+### Available Strategies
+
 - **Martingale**: After each loss, the bet is doubled to recover previous losses. After a win or reaching the max attempts, the bet resets to the initial amount. This strategy aims to recover all previous losses with a single win, but can quickly reach the max bet limit if you hit a losing streak.
+
+- **Reverse Martingale**: After each win, the bet is doubled to maximize profit during a winning streak. After a loss or reaching a user-defined win streak, the bet resets to the initial amount. This strategy tries to capitalize on consecutive wins while minimizing losses.
+
+- **Hybrid**: An adaptive strategy that doubles the bet after a win (like Reverse Martingale), resets after two wins, switches sides after three consecutive losses, and randomly switches sides after a single loss. This approach attempts to balance risk and adapt to streaks, potentially reducing the impact of long losing streaks.
+
+- **Flat Bet**: Always bets the same fixed amount every round, regardless of win or loss. This strategy is the lowest risk and easiest to track, but does not attempt to recover losses or maximize streaks. Good for testing or conservative play.
+
+#### Stop Loss Feature
+
+All strategies now support a **stop loss** option. You can set a maximum amount you are willing to lose before the bot automatically stops. This helps manage risk and prevent runaway losses. You will be prompted for a stop loss value when starting the bot.
+
+#### Side Selection
+
+For all strategies, you can choose which side to bet on (`h`, `t`, or `random`).
+
+#### Example Startup
+
+When you run the bot, you will be prompted for:
+- Initial bet amount
+- Target profit
+- Stop loss amount
+- Strategy selection
+- (If applicable) Win streak for Reverse Martingale
+- Side selection
+
+---
 
 - **Reverse Martingale**: After each win, the bet is doubled to maximize profit during a winning streak. After a loss or reaching a 2-win streak, the bet resets to the initial amount. This strategy tries to capitalize on consecutive wins while minimizing losses.
 

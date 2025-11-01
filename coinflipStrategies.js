@@ -12,7 +12,7 @@ const { sleep, randomSide, getCoinflipResult, randomInt } = require('./utils');
 /**
  * Martingale strategy: double bet after loss, reset after win or max attempts
  */
-async function martingale(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, maxAttempts = 7, chosenSide = 'random') {
+async function martingale(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, maxAttempts = 7, chosenSide = 'random', stopLoss = 0) {
   let attempt = 1, currentBet = baseBet, totalIncome = 0, totalFlips = 0;
   const startTime = Date.now();
   console.log(`🎮 Starting Martingale strategy with base bet ${baseBet}, max attempts before reset: ${maxAttempts}`);
@@ -21,6 +21,12 @@ async function martingale(client, channelId, baseBet = 1, maxBet = 1000, profitG
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🎉 Target profit reached: ${totalIncome}. Stopping bot.`);
       console.log(`⏱️ Duration to reach profit: ${duration} seconds.`);
+      process.exit(0);
+    }
+    if (stopLoss > 0 && totalIncome <= -stopLoss) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🛑 Stop loss triggered: ${totalIncome}. Stopping bot.`);
+      console.log(`⏱️ Duration to stop loss: ${duration} seconds.`);
       process.exit(0);
     }
     const currentSide = (chosenSide === 'random') ? randomSide() : chosenSide;
@@ -58,7 +64,7 @@ async function martingale(client, channelId, baseBet = 1, maxBet = 1000, profitG
 /**
  * Reverse Martingale: double bet after win, reset after loss or 2-win streak
  */
-async function reverseMartingale(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, winStreakLimit = 2, chosenSide = 'random') {
+async function reverseMartingale(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, winStreakLimit = 2, chosenSide = 'random', stopLoss = 0) {
   let currentBet = baseBet, currentStreak = 0, totalIncome = 0, totalFlips = 0;
   const startTime = Date.now();
   console.log(`🎮 Starting Reverse Martingale strategy with base bet ${baseBet}, reset after ${winStreakLimit} consecutive wins`);
@@ -67,6 +73,12 @@ async function reverseMartingale(client, channelId, baseBet = 1, maxBet = 1000, 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🎉 Target profit reached: ${totalIncome}. Stopping bot.`);
       console.log(`⏱️ Duration to reach profit: ${duration} seconds.`);
+      process.exit(0);
+    }
+    if (stopLoss > 0 && totalIncome <= -stopLoss) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🛑 Stop loss triggered: ${totalIncome}. Stopping bot.`);
+      console.log(`⏱️ Duration to stop loss: ${duration} seconds.`);
       process.exit(0);
     }
   const currentSide = (chosenSide === 'random') ? randomSide() : chosenSide;
@@ -104,7 +116,7 @@ async function reverseMartingale(client, channelId, baseBet = 1, maxBet = 1000, 
 /**
  * Hybrid strategy: double after win, reset after 2 wins, switch side after 3 losses, random switch after single loss
  */
-async function hybrid(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400) {
+async function hybrid(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, stopLoss = 0) {
   let currentBet = baseBet, winStreak = 0, loseStreak = 0, totalIncome = 0, totalFlips = 0;
   let currentSide = randomSide();
   const startTime = Date.now();
@@ -114,6 +126,12 @@ async function hybrid(client, channelId, baseBet = 1, maxBet = 1000, profitGoal 
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🎉 Target profit reached: ${totalIncome}. Stopping bot.`);
       console.log(`⏱️ Duration to reach profit: ${duration} seconds.`);
+      process.exit(0);
+    }
+    if (stopLoss > 0 && totalIncome <= -stopLoss) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🛑 Stop loss triggered: ${totalIncome}. Stopping bot.`);
+      console.log(`⏱️ Duration to stop loss: ${duration} seconds.`);
       process.exit(0);
     }
     console.log(`🪙 Flip #${totalFlips + 1} | Bet: ${currentBet} | Side: ${currentSide}`);
@@ -162,7 +180,7 @@ async function hybrid(client, channelId, baseBet = 1, maxBet = 1000, profitGoal 
 /**
  * Flat Bet strategy: always bet the same amount, regardless of win/loss
  */
-async function flatBet(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, chosenSide = 'random') {
+async function flatBet(client, channelId, baseBet = 1, maxBet = 1000, profitGoal = 400, chosenSide = 'random', stopLoss = 0) {
   let totalIncome = 0, totalFlips = 0;
   const startTime = Date.now();
   console.log(`🎮 Starting Flat Bet strategy with fixed bet ${baseBet}`);
@@ -171,6 +189,12 @@ async function flatBet(client, channelId, baseBet = 1, maxBet = 1000, profitGoal
       const duration = ((Date.now() - startTime) / 1000).toFixed(2);
       console.log(`🎉 Target profit reached: ${totalIncome}. Stopping bot.`);
       console.log(`⏱️ Duration to reach profit: ${duration} seconds.`);
+      process.exit(0);
+    }
+    if (stopLoss > 0 && totalIncome <= -stopLoss) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🛑 Stop loss triggered: ${totalIncome}. Stopping bot.`);
+      console.log(`⏱️ Duration to stop loss: ${duration} seconds.`);
       process.exit(0);
     }
     const currentSide = (chosenSide === 'random') ? randomSide() : chosenSide;

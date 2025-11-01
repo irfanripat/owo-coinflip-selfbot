@@ -59,6 +59,7 @@ function askInitialBet() {
   });
 }
 
+
 function askTargetProfit(initialBet) {
   rl.question('Enter target profit (positive integer): ', (profitInput) => {
     const targetProfit = parseInt(profitInput);
@@ -66,12 +67,20 @@ function askTargetProfit(initialBet) {
       console.log('❌ Invalid profit. Please enter a positive integer.');
       return askTargetProfit(initialBet);
     }
-    askStrategy(initialBet, targetProfit);
+    askStopLoss(initialBet, targetProfit);
+  });
+}
+
+function askStopLoss(initialBet, targetProfit) {
+  rl.question('Enter stop loss (amount to lose before stopping, 0 for none): ', (lossInput) => {
+    let stopLoss = parseInt(lossInput);
+    if (isNaN(stopLoss) || stopLoss < 0) stopLoss = 0;
+    askStrategy(initialBet, targetProfit, stopLoss);
   });
 }
 
 
-function askStrategy(initialBet, targetProfit) {
+function askStrategy(initialBet, targetProfit, stopLoss) {
   rl.question('Select strategy number to run: ', (answer) => {
     const idx = parseInt(answer) - 1;
     const strategyObj = strategyMap[idx];
@@ -104,11 +113,13 @@ function askStrategy(initialBet, targetProfit) {
         client.on('ready', async () => {
           console.log(`(${client.user.tag}) ready for coinflip strategy: ${strategyObj.label}`);
           if (strategyObj.key === 'martingale') {
-            strategy(client, channelId, initialBet, maxBet, targetProfit, maxAttempts, chosenSide);
+            strategy(client, channelId, initialBet, maxBet, targetProfit, maxAttempts, chosenSide, stopLoss);
           } else if (strategyObj.key === 'reverseMartingale') {
-            strategy(client, channelId, initialBet, maxBet, targetProfit, reverseWinStreak, chosenSide);
+            strategy(client, channelId, initialBet, maxBet, targetProfit, reverseWinStreak, chosenSide, stopLoss);
           } else if (strategyObj.key === 'flatBet') {
-            strategy(client, channelId, initialBet, maxBet, targetProfit, chosenSide);
+            strategy(client, channelId, initialBet, maxBet, targetProfit, chosenSide, stopLoss);
+          } else if (strategyObj.key === 'hybrid') {
+            strategy(client, channelId, initialBet, maxBet, targetProfit, stopLoss);
           } else {
             strategy(client, channelId, initialBet, maxBet, targetProfit);
           }

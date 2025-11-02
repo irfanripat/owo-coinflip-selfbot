@@ -216,9 +216,84 @@ async function flatBet(client, channelId, baseBet = 1, maxBet = 1000, profitGoal
   }
 }
 
+
+/**
+ * Cash-Aware Martingale: calculates initial bet based on current cash, max bet, and total attempts.
+ * Adjusts bets dynamically and sleeps after reaching target profit.
+ */
+async function cashAwareMartingale(client, channelId, currentCash = 500000, maxBet = 250000, totalAttempts = 7, targetProfit = 400, chosenSide = 'random', stopLoss = 0) {
+  let totalIncome = 0, totalFlips = 0;
+  const startTime = Date.now();
+  // Calculate baseBet so that sum of all bets <= currentCash and no bet > maxBet
+  let baseBetByCash = Math.floor(currentCash / (Math.pow(2, totalAttempts) - 1));
+  let baseBetByMaxBet = Math.floor(maxBet / Math.pow(2, totalAttempts - 1));
+  let baseBet = Math.min(baseBetByCash, baseBetByMaxBet);
+  if (baseBet < 1) baseBet = 1;
+  let currentBet = baseBet;
+  let attempt = 1;
+  console.log(`🎮 Starting Cash-Aware Martingale with current cash ${currentCash}, max bet ${maxBet}, total attempts ${totalAttempts}, base bet ${baseBet}`);
+  while (true) {
+    if (totalIncome >= targetProfit) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🎉 Target profit reached: ${totalIncome}. Sleeping for 5 minutes.`);
+      console.log(`⏱️ Duration to reach profit: ${duration} seconds.`);
+      await sleep(300000); // sleep for 5 minutes
+      // Optionally reset profit tracking or exit
+      totalIncome = 0;
+      attempt = 1;
+      currentBet = baseBet;
+      continue;
+    }
+    if (stopLoss > 0 && totalIncome <= -stopLoss) {
+      const duration = ((Date.now() - startTime) / 1000).toFixed(2);
+      console.log(`🛑 Stop loss triggered: ${totalIncome}. Stopping bot.`);
+      console.log(`⏱️ Duration to stop loss: ${duration} seconds.`);
+      process.exit(0);
+    }
+    // Adjust base bet if cash changes
+    let effectiveCash = currentCash + totalIncome;
+    let baseBetByCash = Math.floor(effectiveCash / (Math.pow(2, totalAttempts) - 1));
+    let baseBetByMaxBet = Math.floor(maxBet / Math.pow(2, totalAttempts - 1));
+    baseBet = Math.min(baseBetByCash, baseBetByMaxBet);
+    if (baseBet < 1) baseBet = 1;
+    if (currentBet > effectiveCash || currentBet > maxBet) {
+      currentBet = baseBet;
+      attempt = 1;
+      console.log(`⚠️ Not enough cash or bet exceeds maxBet. Resetting to base bet: ${baseBet}`);
+    }
+    const currentSide = (chosenSide === 'random') ? randomSide() : chosenSide;
+    console.log(`🪙 Attempt ${attempt} | Bet: ${currentBet} | Side: ${currentSide} | Cash: ${effectiveCash}`);
+    const resultMsg = await getCoinflipResult(client, channelId, currentBet, currentSide);
+    totalFlips++;
+    if (!resultMsg) { console.log('⚠️ No result, retrying...'); continue; }
+    if (/you won/i.test(resultMsg.content)) {
+      totalIncome += currentBet;
+      console.log(`✅ You WON! (+${currentBet}) | 💰 Current income: ${totalIncome} | Cash: ${effectiveCash + currentBet}`);
+      attempt = 1;
+      currentBet = baseBet;
+    } else if (/you lost/i.test(resultMsg.content)) {
+      totalIncome -= currentBet;
+      console.log(`❌ You LOST! (-${currentBet}) | 💰 Current income: ${totalIncome} | Cash: ${effectiveCash - currentBet}`);
+      if (attempt >= totalAttempts) {
+        console.log("🚫 Max attempts reached — resetting bet.");
+        attempt = 1;
+        currentBet = baseBet;
+      } else {
+        attempt++;
+        currentBet = Math.min(currentBet * 2, maxBet);
+      }
+    }
+    if (totalFlips % 20 === 0) {
+      console.log(`📊 Stats → Total flips: ${totalFlips} | Total income: ${totalIncome}`);
+    }
+    await sleep(randomInt(15000, 20001));
+  }
+}
+
 module.exports = {
   martingale,
   reverseMartingale,
   hybrid,
   flatBet,
+  cashAwareMartingale,
 };
